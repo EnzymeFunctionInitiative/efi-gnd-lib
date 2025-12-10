@@ -265,10 +265,8 @@ class SingleGndMySqlRetrieval
         $stmt->execute([$row['AC']]);
         $anno = $stmt->fetch();
 
-        // Decode metadata if present (JSON or serialized in DB? schema says TEXT)
-        // Perl decode_meta_struct implies a custom format, assuming simple JSON here or direct mapping
-        $metadata = []; // Default
-        // In a real scenario, parse $anno['metadata'] here.
+        // Decode metadata if present
+        $metadata = json_decode($anno['metadata'] ?? "", true);
 
         // 2. Process Families (Pfam/InterPro)
         $pfams = array_filter(explode(',', $row['pfam_fam'] ?? ''));
@@ -300,10 +298,10 @@ class SingleGndMySqlRetrieval
             "direction" => ($row['DIRECTION'] == 0) ? "complement" : "normal",
             "type" => ($row['TYPE'] == 0) ? "circular" : "linear",
             "seq_len" => (int)$row['seq_len_aa'],
-            "organism" => $anno['organism'] ?? "Unknown Organism", // Derived from metadata usually
+            "organism" => $metadata['o'] ?? "Unknown Organism",
             "taxon_id" => (int)($anno['taxonomy_id'] ?? 0),
             "anno_status" => (int)($anno['swissprot_status'] ?? 0),
-            "desc" => "Description placeholder", // Would come from metadata
+            "desc" => $metadata['d'] ?? "",
             "pfam_desc" => array_values($pfamDescs),
             "ipro_family_desc" => array_values($iproDescs),
             "interpro" => array_values($ipros),
