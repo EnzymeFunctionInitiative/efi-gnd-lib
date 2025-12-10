@@ -1,0 +1,18 @@
+{
+    "name": "efi/gnd",
+    "description": "Library for reading EFI Genome Neighborhood Diagram files from PHP",
+    "type": "library",
+    "license": "GPL-3.0-only",
+    "autoload": {
+        "psr-4": {
+            "Efi\\Gnd\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nils Oberg",
+            "email": "noberg@illinois.edu"
+        }
+    ],
+    "require": {}
+}
