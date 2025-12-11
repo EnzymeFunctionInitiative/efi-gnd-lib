@@ -8,26 +8,17 @@
 
 namespace Efi\Gnd;
 
+use Efi\Gnd\Interface\GndDatabaseServiceInterface;
 use \PDO;
-use Efi\Gnd\Dto\SingleGndMySqlRetrievalParams;
 
-class SingleGndMySqlRetrieval
+class SingleGndMySqlRetrieval implements GndDatabaseServiceInterface
 {
     private PDO $pdo;
     private string $warning = "";
 
-    public function __construct(SingleGndMySqlRetrievalParams $params)
+    public function __construct(PDO $pdo)
     {
-        $options = [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ];
-        try {
-            $this->pdo = new PDO($params->getDsn(), $params->username, $params->password, $options);
-        } catch (\PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
-        }
+        $this->pdo = $pdo;
     }
 
     public function getError(): string
