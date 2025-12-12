@@ -1,8 +1,9 @@
 <?php
 
-namespace Efi\Gnd\Logic;
+namespace Efi\Gnd;
 
 use Efi\Gnd\Dto\GndMetadata;
+use Efi\Gnd\Dto\GndQueryParams;
 use Efi\Gnd\Enum\SequenceVersion;
 use Efi\Gnd\Interface\GndReaderInterface;
 use \PDO;

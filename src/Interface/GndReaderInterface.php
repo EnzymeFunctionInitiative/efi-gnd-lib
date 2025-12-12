@@ -4,6 +4,7 @@ namespace Efi\Gnd\Interface;
 
 use Efi\Gnd\Enum\SequenceVersion;
 use Efi\Gnd\Dto\GndMetadata;
+use Efi\Gnd\Dto\GndQueryParams;
 
 interface GndReaderInterface
 {
