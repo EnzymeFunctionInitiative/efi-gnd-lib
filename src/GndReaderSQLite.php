@@ -4,19 +4,18 @@ namespace Efi\Gnd\Logic;
 
 use Efi\Gnd\Dto\GndMetadata;
 use Efi\Gnd\Enum\SequenceVersion;
+use Efi\Gnd\Interface\GndReaderInterface;
 use \PDO;
 use \PDOException;
 
-class GndReader
+class GndReaderSQLite implements GndReaderInterface
 {
-    private ?PDO $pdo = null;
-    private ?ScaleFactorComputation $scaleFactorHelper = null;
     private ?SequenceVersion $sequenceVersion = null;
 
     private ?GndMetadata $metadata = null;
 
     public function __construct(
-        private readonly string $dsn,
+        private readonly PDO $pdo,
     )
     {
     }
@@ -67,7 +66,7 @@ class GndReader
 
         $coordHelper = $this->getLayoutMapper();
 
-		$attrParser = new SequenceMetadataParser();
+		$attrParser = new Logic\SequenceMetadataParser();
 
         foreach ($indices as $index) {
             $queryRow = $this->getQueryRow($index);
@@ -171,38 +170,17 @@ class GndReader
         return SequenceVersion::UniProt;
     }
 
-    private function getLayoutMapper(): LayoutMapper
+    private function getLayoutMapper(): Logic\LayoutMapper
     {
         if ($this->layoutMapper !== null) {
             return $this->layoutMapper;
         }
-        $this->layoutMapper = new LayoutMapper($this->getPdo());
+        $this->layoutMapper = new Logic\LayoutMapper($this->getPdo());
         return $this->layoutMapper;
     }
 
     private function getPdo(): PDO
     {
-        if ($this->pdo !== null) {
-            return $this->pdo;
-        }
-
-        try {
-            $this->pdo = new PDO($this->dsn, null, null, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ]);
-
-            // Sanity check
-            $sql = 'SELECT * FROM metadata';
-            $result = $this->pdo->query($sql);
-
-            // CREATE TABLE metadata (cooccurrence REAL, name VARCHAR(255), neighborhood_size INTEGER, type VARCHAR(10), sequence TEXT);
-            if (!$result || count($result->fetch()) === 0) {
-                throw new \RuntimeException('Invalid database: empty metadata table');
-            }
-        } catch (PDOException $ex) {
-            throw new \RuntimeException('Initial database connection query failed: ' . $ex->getMessage());
-        }
-
         return $this->pdo;
     }
 

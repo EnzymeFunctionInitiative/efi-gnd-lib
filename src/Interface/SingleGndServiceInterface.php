@@ -2,7 +2,7 @@
 
 namespace Efi\Gnd\Interface;
 
-interface GndDatabaseServiceInterface
+interface SingleGndServiceInterface
 {
     function getNeighborhoodData(string $accession, int $windowSize): ?array;
 }

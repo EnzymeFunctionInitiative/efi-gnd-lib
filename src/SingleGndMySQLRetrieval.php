@@ -8,10 +8,10 @@
 
 namespace Efi\Gnd;
 
-use Efi\Gnd\Interface\GndDatabaseServiceInterface;
+use Efi\Gnd\Interface\SingleGndServiceInterface;
 use \PDO;
 
-class SingleGndMySqlRetrieval implements GndDatabaseServiceInterface
+class SingleGndMySQLRetrieval implements SingleGndServiceInterface
 {
     private PDO $pdo;
     private string $warning = "";
