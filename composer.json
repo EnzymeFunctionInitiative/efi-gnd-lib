@@ -1,5 +1,5 @@
 {
-    "name": "efi/gnd",
+    "name": "enzymefunctioninitiative/efi-gnd-lib",
     "description": "Library for reading EFI Genome Neighborhood Diagram files from PHP",
     "type": "library",
     "license": "GPL-3.0-only",
