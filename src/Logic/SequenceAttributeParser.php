@@ -31,7 +31,7 @@ class SequenceAttributeParser
 
         $this->setFamilyAttributes($attr, $row, $isQuery);
 
-        $this->setColorAttributes($attr, $row)
+        $this->setColorAttributes($attr, $row);
 
         if ($isQuery) {
             $this->setQueryAttributes($attr, $row);
@@ -103,6 +103,7 @@ class SequenceAttributeParser
                 $familyDesc[0] = "Query without family";
         }
 
+        $familyCount = count($attr['pfam']);
         $attr['pfam_desc'] = $familyDesc;
         if (count($attr['pfam_desc']) < $familyCount) {
             if (count($attr['pfam_desc']) > 0)

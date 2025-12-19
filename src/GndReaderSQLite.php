@@ -15,6 +15,8 @@ class GndReaderSQLite implements GndReaderInterface
 
     private ?GndMetadata $metadata = null;
 
+    private ?Logic\LayoutMapper $layoutMapper = null;
+
     public function __construct(
         private readonly PDO $pdo,
     )
@@ -65,9 +67,9 @@ class GndReaderSQLite implements GndReaderInterface
 
         $gnds = [];
 
-        $coordHelper = $this->getLayoutMapper();
+        $coordHelper = $this->getLayoutMapper($params);
 
-		$attrParser = new Logic\SequenceMetadataParser();
+		$attrParser = new Logic\SequenceAttributeParser();
 
         foreach ($indices as $index) {
             $queryRow = $this->getQueryRow($index);
@@ -75,14 +77,14 @@ class GndReaderSQLite implements GndReaderInterface
                 continue;
             }
 
-            $queryData = $attrParser->parseAttributes($queryRow);
+            $queryData = $attrParser->parseAttributes($queryRow, true);
 
             $coordHelper->updateCoords($queryData);
 
             $neighborRows = $this->getNeighborRows($queryRow['sort_key'], $queryRow['num'], $params->window);
             $neighborData = [];
             foreach ($neighborRows as $neighborRow) {
-                $nb = $attrParser->parseAttributes($neighborRow);
+                $nb = $attrParser->parseAttributes($neighborRow, false);
                 $coordHelper->updateCoords($nb, true);
                 $neighborData[] = $nb;
             }
@@ -171,12 +173,12 @@ class GndReaderSQLite implements GndReaderInterface
         return SequenceVersion::UniProt;
     }
 
-    private function getLayoutMapper(): Logic\LayoutMapper
+    private function getLayoutMapper(GndQueryParams $params): Logic\LayoutMapper
     {
         if ($this->layoutMapper !== null) {
             return $this->layoutMapper;
         }
-        $this->layoutMapper = new Logic\LayoutMapper($this->getPdo());
+        $this->layoutMapper = new Logic\LayoutMapper($this->getPdo(), $params->scaleFactor);
         return $this->layoutMapper;
     }
 
@@ -252,9 +254,9 @@ class GndReaderSQLite implements GndReaderInterface
         $indices = [];
 
         if ($params->unirefId) {
-            $indexLookup = new \Efi\GndViewerBundle\Stats\Lookup\UnirefIdIndex($this->getPdo(), $params->sequenceVersion);
+            $indexLookup = new \Efi\Gnd\Logic\IdLookup\UnirefIdIndex($this->getPdo(), $params->sequenceVersion);
         } else {
-            $indexLookup = new \Efi\GndViewerBundle\Stats\Lookup\UnirefRange($this->getPdo(), $params->sequenceVersion);
+            $indexLookup = new \Efi\Gnd\Logic\IdLookup\UnirefRange($this->getPdo(), $params->sequenceVersion);
         }
 
         foreach ($rangeIndices as $unirefIndexId) {
@@ -280,7 +282,7 @@ class GndReaderSQLite implements GndReaderInterface
         $allIndices = $this->flattenRanges($indexRanges);
         $indicesForScaleFactor = $this->getScaleFactorIndices($allIndices);
 
-        $stats = $this->getLayoutMapper()->computeGlobalScaleFactor($indicesForScaleFactor, $params->window);
+        $stats = $this->getLayoutMapper($params)->computeGlobalScaleFactor($indicesForScaleFactor, $params->window);
 
         $totalTime = microtime(true) - $timeStart;
 
@@ -359,13 +361,13 @@ class GndReaderSQLite implements GndReaderInterface
     {
         // This handles the case when the user wants to look at the contents of a UniRef cluster
         if ($params->unirefId) {
-            $unirefIdLookup = new \Efi\GndViewerBundle\Stats\Lookup\UnirefIdSearch($this->getPdo(), $params->sequenceVersion);
+            $unirefIdLookup = new \Efi\Gnd\Logic\IdLookup\UnirefIdSearch($this->getPdo(), $params->sequenceVersion);
             $indexRanges = $unirefIdLookup->query($params->unirefId);
             return [$indexRanges];
         }
 
-        $clusterIdLookup = new \Efi\GndViewerBundle\Stats\Lookup\ClusterId($this->getPdo(), $params->sequenceVersion);
-        $sequenceIdLookup = new \Efi\GndViewerBundle\Stats\Lookup\SequenceId($this->getPdo());
+        $clusterIdLookup = new \Efi\Gnd\Logic\IdLookup\ClusterId($this->getPdo(), $params->sequenceVersion);
+        $sequenceIdLookup = new \Efi\Gnd\Logic\IdLookup\SequenceId($this->getPdo());
 
         $indexRanges = [];
 

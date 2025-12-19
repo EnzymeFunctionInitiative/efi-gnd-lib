@@ -94,7 +94,7 @@ class LayoutMapper
             $legendScale = $max_width;
         } else {
             // Compute values based on current dataset
-            list($scaleFactor, $legendScale, $max_side, $max_width) = $this->scaleFactorHelper->computeScaleFactor($this->minBasePair, $this->maxBasePair, $this->maxQueryWidth);
+            list($scaleFactor, $legendScale, $max_side, $max_width) = $this->computeScaleFactor($this->minBasePair, $this->maxBasePair, $this->maxQueryWidth);
             $this->scaleFactor = $scaleFactor;
         }
 

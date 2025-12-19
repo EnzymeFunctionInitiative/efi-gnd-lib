@@ -1,6 +1,6 @@
 <?php
 
-namespace Efi\Gnd\Logic\Lookup;
+namespace Efi\Gnd\Logic\IdLookup;
 
 use Efi\Gnd\Logic\IdLookup;
 
