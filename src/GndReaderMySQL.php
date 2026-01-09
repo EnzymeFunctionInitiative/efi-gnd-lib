@@ -2,10 +2,13 @@
 
 namespace Efi\Gnd;
 
-use Efi\Gnd\Enum\SequenceVersion;
-use Efi\Gnd\Dto\GndMetadata;
-use Efi\Gnd\Dto\GndQueryParams;
+use Efi\Gnd\Interface\GndReaderInterface;
+use \PDO;
 
-class GndReaderMySQL implements GndReaderInterface
+class GndReaderMySQL extends GndReader implements GndReaderInterface
 {
+    public function __construct(PDO $pdo)
+    {
+        parent::__construct($pdo);
+    }
 }
