@@ -85,10 +85,7 @@ class GndReader implements GndReaderInterface
      */
     public function retrieveRanges(string $rangeParameter, GndQueryParams $params): array
     {
-        //$ranges - 1x2 array (e.g. [ [start_idx, end_idx] ])
-        $ranges = $this->parseRangeParameter($rangeParameter);
-
-        $indices = $this->getRangeIndices($ranges, $params);
+        $indices = $this->convertRangeParameterToIndices($rangeParameter, $params);
 
         $gnds = [];
 
@@ -144,33 +141,11 @@ class GndReader implements GndReaderInterface
         }
     }
 
-    /**
-     * Convert a list of block ranges into individual row indices in the database
-     */
-    public function getRangeIndices(array $ranges, GndQueryParams $params): array
+    public function convertRangeParameterToIndices(string $rangeParameter, GndQueryParams $params): array
     {
-        $rangeIndices = $this->flattenRanges($ranges);
-        if ($params->sequenceVersion !== SequenceVersion::UniProt) {
-            $indices = $this->getUnirefIndices($rangeIndices, $params);
-        } else {
-            $indices = $rangeIndices;
-        }
+        $ranges = $this->parseRangeParameter($rangeParameter);
+        $indices = $this->getRangeIndices($ranges, $params);
         return $indices;
-    }
-
-    public function parseRangeParameter(string $rangeParameter): array
-    {
-        $ranges = [];
-        $subRanges = preg_split('/,+/', $rangeParameter);
-        foreach ($subRanges as $range) {
-            $parts = explode('-', $range);
-            if (count($parts) > 1 && ctype_digit($parts[0]) && ctype_digit($parts[1])) {
-                $ranges[] = [intval($parts[0]), intval($parts[1])];
-            } else if (count($parts) > 0 && ctype_digit($parts[0])) {
-                $ranges[] = [intval($parts[0]), intval($parts[0])];
-            }
-        }
-        return $ranges;
     }
 
 
@@ -274,6 +249,39 @@ class GndReader implements GndReaderInterface
 
 
     // ----- Range helpers -----
+
+    /**
+     * Convert a list of block ranges into individual row indices in the database
+     */
+    public function getRangeIndices(array $ranges, GndQueryParams $params): array
+    {
+        $rangeIndices = $this->flattenRanges($ranges);
+        if ($params->sequenceVersion !== SequenceVersion::UniProt) {
+            $indices = $this->getUnirefIndices($rangeIndices, $params);
+        } else {
+            $indices = $rangeIndices;
+        }
+        return $indices;
+    }
+
+    /**
+     * Converts a string-based range parameter into an array.
+     * @returns {array} $ranges - 1x2 array (e.g. [ [start_idx, end_idx] ])
+     */
+    private function parseRangeParameter(string $rangeParameter): array
+    {
+        $ranges = [];
+        $subRanges = preg_split('/,+/', $rangeParameter);
+        foreach ($subRanges as $range) {
+            $parts = explode('-', $range);
+            if (count($parts) > 1 && ctype_digit($parts[0]) && ctype_digit($parts[1])) {
+                $ranges[] = [intval($parts[0]), intval($parts[1])];
+            } else if (count($parts) > 0 && ctype_digit($parts[0])) {
+                $ranges[] = [intval($parts[0]), intval($parts[0])];
+            }
+        }
+        return $ranges;
+    }
 
     private function getUnirefIndices(array $rangeIndices, GndQueryParams $params): array
     {

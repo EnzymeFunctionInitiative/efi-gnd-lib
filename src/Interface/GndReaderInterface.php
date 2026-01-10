@@ -12,4 +12,6 @@ interface GndReaderInterface
     function getMetadata(): GndMetadata;
     function getSearchExtent(array $searchItems, GndQueryParams $params): array;
     function retrieveRanges(string $range, GndQueryParams $params): array;
+    function iterateRawGndData(array $indices, GndQueryParams $params): \Generator;
+    function convertRangeParameterToIndices(string $rangeParameter, GndQueryParams $params): array;
 }
